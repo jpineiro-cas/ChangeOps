@@ -1,0 +1,6 @@
+{
+  "name": "ChangeOps - IT Change Management Dashboard",
+  "description": "ITIL Change Management Dashboard featuring change calendar, upcoming execution timeline, overdue and stale change detection, downtime impact tracking, and flexible ticketing export data import.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
