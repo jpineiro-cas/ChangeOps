@@ -57,8 +57,8 @@ export const UpcomingChangesView: React.FC<UpcomingChangesViewProps> = ({
           return false;
         }
 
-        // Must start in future or be scheduled for today
-        return start.getTime() >= now - 2 * 60 * 60 * 1000;
+        // Past changes are not upcoming, even if they are scheduled for today.
+        return start.getTime() >= now;
       })
       .sort((a, b) => {
         const da = parseDate(a.startTime)?.getTime() || 0;

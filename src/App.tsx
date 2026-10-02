@@ -18,10 +18,12 @@ const STORAGE_KEY = 'changeops_tickets_v1';
 const LAST_SYNC_KEY = 'changeops_last_sync_v1';
 
 export default function App() {
-  // Reference date anchored around the sample data timeframe: Sep 28, 2026
-  const [referenceDate, setReferenceDate] = useState<Date>(
-    new Date('2026-09-28T06:24:25-07:00')
-  );
+  const [referenceDate, setReferenceDate] = useState<Date>(() => new Date());
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setReferenceDate(new Date()), 60_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   // Tickets state with localStorage persistence
   const [tickets, setTickets] = useState<ChangeTicket[]>(() => {
@@ -64,13 +66,13 @@ export default function App() {
     .map((t) => analyzeOverdue(t, referenceDate))
     .filter((a): a is NonNullable<typeof a> => a !== null).length;
 
-  // Upcoming count (scheduled or approved starting >= referenceDate)
+  // Upcoming count (non-terminal changes starting at or after the current time)
   const now = referenceDate.getTime();
   const upcomingCount = tickets.filter((t) => {
     if (t.status === 'Closed' || t.status === 'Cancelled' || t.status === 'Rejected') return false;
     const start = parseDate(t.startTime);
     if (!start) return false;
-    return start.getTime() >= now - 2 * 60 * 60 * 1000;
+    return start.getTime() >= now;
   }).length;
 
   const handleImportTickets = (

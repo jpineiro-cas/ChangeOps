@@ -6,6 +6,34 @@ export function parseDate(dateStr: string | null | undefined): Date | null {
   const trimmed = dateStr.trim();
   if (!trimmed) return null;
 
+  // Parse timezone-free date-times as local wall-clock times consistently.
+  const localMatch = trimmed.match(
+    /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/
+  );
+  if (localMatch) {
+    const [, yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr, millisecondStr] = localMatch;
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+    const hours = Number(hourStr);
+    const minutes = Number(minuteStr);
+    const seconds = Number(secondStr || 0);
+    const milliseconds = Number((millisecondStr || '').padEnd(3, '0') || 0);
+    const localDate = new Date(year, month - 1, day, hours, minutes, seconds, milliseconds);
+
+    if (
+      localDate.getFullYear() === year &&
+      localDate.getMonth() === month - 1 &&
+      localDate.getDate() === day &&
+      localDate.getHours() === hours &&
+      localDate.getMinutes() === minutes &&
+      localDate.getSeconds() === seconds
+    ) {
+      return localDate;
+    }
+    return null;
+  }
+
   // Try standard Date parse first
   const parsed = new Date(trimmed);
   if (!isNaN(parsed.getTime())) {
