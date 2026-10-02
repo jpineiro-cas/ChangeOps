@@ -123,11 +123,52 @@ export function getRelativeTimeString(dateStr: string | null | undefined, refere
   };
 }
 
+type OverdueStatus =
+  | 'terminal'
+  | 'inProgress'
+  | 'scheduled'
+  | 'approved'
+  | 'awaitingApproval'
+  | 'implemented'
+  | 'pendingVerification'
+  | 'other';
+
+function classifyOverdueStatus(status: string): OverdueStatus {
+  const normalized = status.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  if (['closed', 'cancelled', 'canceled', 'rejected'].some((value) => normalized.includes(value))) {
+    return 'terminal';
+  }
+  if (normalized.includes('verification')) return 'pendingVerification';
+  if (normalized.includes('implemented') || normalized.includes('completed') || normalized === 'done') {
+    return 'implemented';
+  }
+  if (
+    normalized.includes('inimplementation') ||
+    normalized.includes('inprogress') ||
+    normalized === 'implementing'
+  ) {
+    return 'inProgress';
+  }
+  if (normalized.includes('scheduled')) return 'scheduled';
+  if (normalized.includes('approved') && !normalized.includes('unapproved')) return 'approved';
+  if (
+    normalized.includes('requested') ||
+    normalized.includes('review') ||
+    normalized.includes('unapproved') ||
+    (normalized.includes('approval') &&
+      ['pending', 'awaiting', 'required', 'requested'].some((value) => normalized.includes(value)))
+  ) {
+    return 'awaitingApproval';
+  }
+  return 'other';
+}
+
 // Determine if a ticket is overdue or needs urgent updates
 export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new Date()): OverdueAnalysis | null {
-  const status = ticket.status;
+  const status = classifyOverdueStatus(ticket.status);
   // Closed or Cancelled tickets are never overdue
-  if (status === 'Closed' || status === 'Cancelled' || status === 'Rejected') {
+  if (status === 'terminal') {
     return null;
   }
 
@@ -137,7 +178,7 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
 
   // 1. Past scheduled end time, but ticket is still active or in progress
   if (end && end.getTime() < now) {
-    if (status === 'In Progress') {
+    if (status === 'inProgress') {
       const hoursOver = Math.round((now - end.getTime()) / (1000 * 60 * 60));
       return {
         ticket,
@@ -148,7 +189,11 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
       };
     }
 
-    if (status === 'Scheduled' || status === 'Approved' || status === 'Requested' || status === 'In Review') {
+    if (
+      status === 'scheduled' ||
+      status === 'approved' ||
+      status === 'awaitingApproval'
+    ) {
       const hoursOver = Math.round((now - end.getTime()) / (1000 * 60 * 60));
       return {
         ticket,
@@ -162,7 +207,7 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
 
   // 2. Scheduled or Requested/In Review, but start time has passed
   if (start && start.getTime() < now) {
-    if (status === 'Scheduled' || status === 'Approved') {
+    if (status === 'scheduled' || status === 'approved') {
       const hoursLate = Math.round((now - start.getTime()) / (1000 * 60 * 60));
       return {
         ticket,
@@ -172,7 +217,7 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
         hoursDelta: hoursLate,
       };
     }
-    if (status === 'Requested' || status === 'In Review') {
+    if (status === 'awaitingApproval') {
       const hoursLate = Math.round((now - start.getTime()) / (1000 * 60 * 60));
       return {
         ticket,
@@ -185,21 +230,21 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
   }
 
   // 3. Imminent start (< 24 hours) but not approved yet
-  if (start && start.getTime() >= now && (status === 'Requested' || status === 'In Review')) {
+  if (start && start.getTime() >= now && status === 'awaitingApproval') {
     const hoursUntil = Math.round((start.getTime() - now) / (1000 * 60 * 60));
     if (hoursUntil <= 24) {
       return {
         ticket,
         reason: 'unapproved_imminent',
         severity: 'warning',
-        message: `Change is scheduled to start in ${hoursUntil}h but is still pending approval in "${status}".`,
+        message: `Change is scheduled to start in ${hoursUntil}h but is still pending approval in "${ticket.status}".`,
         hoursDelta: hoursUntil,
       };
     }
   }
 
   // 4. Implemented or Pending Verification for > 48 hours without closure
-  if (status === 'Implemented' || status === 'Pending Verification') {
+  if (status === 'implemented' || status === 'pendingVerification') {
     if (end && now - end.getTime() > 48 * 60 * 60 * 1000) {
       const daysWaiting = Math.round((now - end.getTime()) / (1000 * 60 * 60 * 24));
       return {
@@ -236,17 +281,11 @@ export function detectConflicts(tickets: ChangeTicket[]): ConflictNotice[] {
 
       // Overlap condition: startA < endB && endA > startB
       if (aStart.getTime() < bEnd.getTime() && aEnd.getTime() > bStart.getTime()) {
-        const adminGroupConflict =
-          a.adminGroup.trim().toLowerCase() === b.adminGroup.trim().toLowerCase();
-        const categoryConflict =
-          a.category.trim().toLowerCase() === b.category.trim().toLowerCase();
-
         const hasDowntime =
-          a.expectedDowntime.toLowerCase().includes('y') ||
+          a.expectedDowntime.toLowerCase().includes('y') &&
           b.expectedDowntime.toLowerCase().includes('y');
 
-        // Flag if same group, category, or both have downtime
-        if (adminGroupConflict || categoryConflict || hasDowntime) {
+        if (hasDowntime) {
           const overlapStart = new Date(Math.max(aStart.getTime(), bStart.getTime())).toISOString();
           const overlapEnd = new Date(Math.min(aEnd.getTime(), bEnd.getTime())).toISOString();
 
@@ -255,8 +294,6 @@ export function detectConflicts(tickets: ChangeTicket[]): ConflictNotice[] {
             ticketB: b,
             overlapStart,
             overlapEnd,
-            adminGroupConflict,
-            categoryConflict,
             hasDowntime,
           });
         }

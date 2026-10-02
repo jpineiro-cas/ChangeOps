@@ -8,7 +8,8 @@ export type ChangeStatus =
   | 'Pending Verification'
   | 'Closed'
   | 'Cancelled'
-  | 'Rejected';
+  | 'Rejected'
+  | (string & {});
 
 export type ChangeClassification =
   | 'Standard'
@@ -57,8 +58,6 @@ export interface ConflictNotice {
   ticketB: ChangeTicket;
   overlapStart: string;
   overlapEnd: string;
-  adminGroupConflict: boolean;
-  categoryConflict: boolean;
   hasDowntime: boolean;
 }
 

@@ -135,7 +135,9 @@ export function parseCSVFile(
     return { tickets: [], errors: ['No valid headers found in the file.'], headers: [] };
   }
 
-  const mapping = userMapping || autoMapColumns(headers);
+  const mapping = { ...autoMapColumns(headers), ...userMapping };
+  if (!mapping.ticketNumber && headers[0]) mapping.ticketNumber = headers[0];
+  if (!mapping.status && headers[1]) mapping.status = headers[1];
 
   const tickets: ChangeTicket[] = result.data.map((row, index) => {
     const getValue = (key: keyof typeof FIELD_ALIASES, fallback: string = ''): string => {
@@ -152,19 +154,7 @@ export function parseCSVFile(
       return fallback;
     };
 
-    // Normalize Status
-    let rawStatus = getValue('status', 'Requested') as ChangeStatus;
-    const normStatus = rawStatus.toLowerCase();
-    let status: ChangeStatus = 'Requested';
-    if (normStatus.includes('prog')) status = 'In Progress';
-    else if (normStatus.includes('sched')) status = 'Scheduled';
-    else if (normStatus.includes('appr')) status = 'Approved';
-    else if (normStatus.includes('rev')) status = 'In Review';
-    else if (normStatus.includes('verif') || normStatus.includes('pend')) status = 'Pending Verification';
-    else if (normStatus.includes('impl') || normStatus.includes('done') || normStatus.includes('comp')) status = 'Implemented';
-    else if (normStatus.includes('close')) status = 'Closed';
-    else if (normStatus.includes('canc')) status = 'Cancelled';
-    else if (normStatus.includes('rej')) status = 'Rejected';
+    const status = getValue('status', 'Requested') as ChangeStatus;
 
     // Normalize Classification
     let rawClass = getValue('classification', 'Normal');

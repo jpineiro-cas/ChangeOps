@@ -26,7 +26,7 @@ export const ConflictAlertBanner: React.FC<ConflictAlertBannerProps> = ({
               {conflicts.length} Potential Change Window Collision{conflicts.length > 1 ? 's' : ''} Detected
             </h4>
             <p className="text-xs text-amber-700">
-              Overlapping scheduled windows discovered within the same Admin Group or involving concurrent expected downtime.
+              Overlapping scheduled windows where both changes have expected downtime.
             </p>
           </div>
         </div>
@@ -51,11 +51,6 @@ export const ConflictAlertBanner: React.FC<ConflictAlertBannerProps> = ({
                   <span className="font-mono font-medium text-amber-900">
                     Overlap: {formatDateTime(c.overlapStart)}
                   </span>
-                  {c.adminGroupConflict && (
-                    <span className="text-[11px] text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">
-                      Same Team: {c.ticketA.adminGroup}
-                    </span>
-                  )}
                   {c.hasDowntime && (
                     <span className="text-[11px] text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded font-medium">
                       Concurrent Downtime Window
