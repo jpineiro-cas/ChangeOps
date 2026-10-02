@@ -262,7 +262,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
               <span className="text-xl font-bold font-mono text-blue-900 tabular-nums">
                 {classificationCounts.Normal}
               </span>
-              <span className="text-[10px] text-blue-700 block mt-0.5">CAB approved</span>
+              <span className="text-[10px] text-blue-700 block mt-0.5">IT approved</span>
             </div>
             <div className="p-2.5 rounded bg-purple-50 border border-purple-100">
               <span className="text-[10px] uppercase font-bold text-purple-800 block">Major</span>

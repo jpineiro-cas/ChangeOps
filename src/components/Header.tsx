@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Read-Only Mirror</span>
             </span>
             <span className="hidden lg:inline-block text-xs text-slate-400">
-              CAB Observability
+              IT Approval Observability
             </span>
           </div>
 

@@ -239,7 +239,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-800">ChangeOps</span>
             <span>·</span>
-            <span>ITIL Change Advisory Board & Release Management (Read-Only Mirror)</span>
+            <span>IT Change Approval & Release Management (Read-Only Mirror)</span>
           </div>
           <div className="text-[11px] text-slate-400">
             Fields mapped: Ticket#, Status, Active action item assignees, Title, Requested work start/end, Downtime?, Classification, Process manager (implementer), Description, Admin group, Categories, Request & Submit users.

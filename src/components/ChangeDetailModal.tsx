@@ -103,7 +103,7 @@ export const ChangeDetailModal: React.FC<ChangeDetailModalProps> = ({
           <div className="flex-1">
             <span className="font-semibold">Ticketing System is Source of Truth: </span>
             <span>
-              All modifications, CAB approval votes, status transitions, and schedule adjustments must be performed directly in your ticketing system for ticket <strong className="font-mono font-bold text-slate-900">{ticket.ticketNumber}</strong>. Re-import your export to view updated states.
+              All modifications, IT approval decisions, status transitions, and schedule adjustments must be performed directly in your ticketing system for ticket <strong className="font-mono font-bold text-slate-900">{ticket.ticketNumber}</strong>. Re-import your export to view updated states.
             </span>
           </div>
         </div>

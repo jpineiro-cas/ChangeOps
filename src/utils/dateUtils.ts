@@ -275,7 +275,7 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
         ticket,
         reason: 'past_start_time',
         severity: 'critical',
-        message: `Requested work start time passed ${hoursLate}h ago without CAB approval.`,
+        message: `Requested work start time passed ${hoursLate}h ago without IT approval.`,
         hoursDelta: hoursLate,
       };
     }

@@ -150,7 +150,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
           <span className="text-xs text-purple-600 font-medium">high impact</span>
         </div>
         <p className="text-[11px] text-slate-500 mt-1">
-          Require strict CAB governance
+          Require strict IT approval
         </p>
       </button>
     </div>
