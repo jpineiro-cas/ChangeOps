@@ -111,6 +111,16 @@ export default function App() {
     downloadFile(csv, `all-changes-export-${referenceDate.toISOString().split('T')[0]}.csv`);
   };
 
+  const handleExportSharedData = () => {
+    const source = [
+      "import { ChangeTicket } from '../types/change';",
+      '',
+      `export const SAMPLE_CHANGE_TICKETS: ChangeTicket[] = ${JSON.stringify(tickets, null, 2)};`,
+      '',
+    ].join('\n');
+    downloadFile(source, 'sampleChanges.ts', 'text/typescript;charset=utf-8');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       {/* Top 3-Zone Header Contract */}
@@ -160,10 +170,19 @@ export default function App() {
             <button
               onClick={handleResetSampleData}
               className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 hover:underline"
-              title="Reload initial ITIL sample change data"
+              title="Discard browser-local data and reload the latest shared sample data"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reset Sample Data</span>
+            </button>
+
+            <button
+              onClick={handleExportSharedData}
+              className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 hover:underline"
+              title="Download the current tickets as the shared sampleChanges.ts dataset"
+            >
+              <Download className="w-3 h-3" />
+              <span>Export Shared Data</span>
             </button>
 
             <button
