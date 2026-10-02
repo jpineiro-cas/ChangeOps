@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChangeTicket } from '../types/change';
 import { formatDateTime, analyzeOverdue } from '../utils/dateUtils';
 import {
@@ -10,8 +10,7 @@ import {
   Layers,
   Shield,
   Lock,
-  Copy,
-  Check,
+  ExternalLink,
   Building,
   Info,
 } from 'lucide-react';
@@ -29,16 +28,9 @@ export const ChangeDetailModal: React.FC<ChangeDetailModalProps> = ({
 }) => {
   if (!ticket) return null;
 
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyTicket = () => {
-    navigator.clipboard.writeText(ticket.ticketNumber);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const overdueAnalysis = analyzeOverdue(ticket, referenceDate);
   const hasDowntime = ticket.expectedDowntime.toLowerCase().includes('y');
+  const ticketUrl = `https://childrensaidnyc.sysaidit.com/SREdit.jsp?id=${encodeURIComponent(ticket.ticketNumber)}`;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
@@ -47,9 +39,14 @@ export const ChangeDetailModal: React.FC<ChangeDetailModalProps> = ({
         <div className="flex items-start justify-between border-b pb-4 border-slate-200">
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono font-bold text-lg text-slate-900">
+              <a
+                href={ticketUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono font-bold text-lg text-slate-900 hover:text-blue-700 hover:underline"
+              >
                 {ticket.ticketNumber}
-              </span>
+              </a>
               <span
                 className={`text-xs font-semibold px-2 py-0.5 rounded font-mono ${
                   ticket.classification === 'Emergency'
@@ -81,14 +78,16 @@ export const ChangeDetailModal: React.FC<ChangeDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopyTicket}
+            <a
+              href={ticketUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-700 hover:text-slate-900 border border-slate-200 rounded hover:bg-slate-50 transition-colors"
-              title="Copy Ticket Number to Clipboard"
+              title="Open ticket in SysAid"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
-              <span>{copied ? 'Copied!' : 'Copy Ticket#'}</span>
-            </button>
+              <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+              <span>Open in SysAid</span>
+            </a>
             <button
               onClick={onClose}
               className="p-1 text-slate-400 hover:text-slate-600 rounded hover:bg-slate-100"
@@ -277,13 +276,16 @@ export const ChangeDetailModal: React.FC<ChangeDetailModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleCopyTicket}
+              <a
+                href={ticketUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded transition-colors"
+                title="Open ticket in SysAid"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
-                <span>{copied ? 'Copied Ticket#' : `Copy ${ticket.ticketNumber}`}</span>
-              </button>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                <span>Open in SysAid</span>
+              </a>
               <button
                 onClick={onClose}
                 className="px-4 py-1.5 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors"
