@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChangeTicket, DashboardView } from '../types/change';
-import { analyzeOverdue, parseDate } from '../utils/dateUtils';
+import { analyzeOverdue, isChangeInProgress, isHighImpactChange, parseDate } from '../utils/dateUtils';
 import {
   AlertCircle,
   Calendar,
@@ -29,7 +29,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
     .map((t) => analyzeOverdue(t, referenceDate))
     .filter((a): a is NonNullable<typeof a> => a !== null);
 
-  const inProgressList = tickets.filter((t) => t.status === 'In Progress');
+  const inProgressList = tickets.filter((t) => isChangeInProgress(t, referenceDate));
 
   const upcoming7Days = tickets.filter((t) => {
     if (t.status === 'Closed' || t.status === 'Cancelled' || t.status === 'Rejected') return false;
@@ -44,10 +44,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
     return t.expectedDowntime.toLowerCase().includes('y');
   });
 
-  const emergencyChanges = tickets.filter((t) => {
-    if (t.status === 'Closed' || t.status === 'Cancelled' || t.status === 'Rejected') return false;
-    return t.classification === 'Emergency' || t.classification === 'Major';
-  });
+  const emergencyChanges = tickets.filter(isHighImpactChange);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -79,21 +76,21 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
 
       {/* 2. In Progress Right Now */}
       <button
-        onClick={() => onSelectView('table')}
+        onClick={() => onSelectView('inProgress')}
         className="text-left p-4 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 transition-all"
       >
         <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-          <span className="font-medium text-slate-700">In Progress Now</span>
+          <span className="font-medium text-slate-700">In Progress / Change Window</span>
           <Activity className="w-4 h-4 text-emerald-600 animate-pulse" />
         </div>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-semibold font-mono tabular-nums text-slate-900">
             {inProgressList.length}
           </span>
-          <span className="text-xs text-emerald-600 font-medium">Active work</span>
+          <span className="text-xs text-emerald-600 font-medium">Active changes</span>
         </div>
         <p className="text-[11px] text-slate-500 mt-1">
-          Currently undergoing execution
+          In implementation or within the scheduled window
         </p>
       </button>
 
@@ -139,7 +136,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
 
       {/* 5. Major & Emergency */}
       <button
-        onClick={() => onSelectView('table')}
+        onClick={() => onSelectView('highImpact')}
         className="text-left p-4 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 transition-all col-span-2 md:col-span-1"
       >
         <div className="flex items-center justify-between text-xs text-slate-500 mb-1">

@@ -10,7 +10,7 @@ import { ChangeTableView } from './components/ChangeTableView';
 import { ChangeDetailModal } from './components/ChangeDetailModal';
 import { ImportModal } from './components/ImportModal';
 import { SourceOfTruthBanner } from './components/SourceOfTruthBanner';
-import { analyzeOverdue, parseDate } from './utils/dateUtils';
+import { analyzeOverdue, isChangeInProgress, isHighImpactChange, parseDate } from './utils/dateUtils';
 import { exportTicketsToCSV, downloadFile } from './utils/csvHelper';
 import { RotateCcw, Download } from 'lucide-react';
 
@@ -214,6 +214,20 @@ export default function App() {
         {currentView === 'table' && (
           <ChangeTableView
             tickets={tickets}
+            onSelectTicket={setSelectedTicket}
+          />
+        )}
+
+        {currentView === 'inProgress' && (
+          <ChangeTableView
+            tickets={tickets.filter((ticket) => isChangeInProgress(ticket, referenceDate))}
+            onSelectTicket={setSelectedTicket}
+          />
+        )}
+
+        {currentView === 'highImpact' && (
+          <ChangeTableView
+            tickets={tickets.filter(isHighImpactChange)}
             onSelectTicket={setSelectedTicket}
           />
         )}

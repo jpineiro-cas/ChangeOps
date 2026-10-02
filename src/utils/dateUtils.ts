@@ -66,6 +66,30 @@ export function parseDate(dateStr: string | null | undefined): Date | null {
   return null;
 }
 
+export function isChangeInProgress(ticket: ChangeTicket, referenceDate: Date): boolean {
+  const status = ticket.status.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (['closed', 'cancelled', 'canceled', 'rejected'].includes(status)) return false;
+
+  if (
+    status.includes('inimplementation') ||
+    status.includes('inprogress') ||
+    status === 'implementing'
+  ) {
+    return true;
+  }
+
+  const start = parseDate(ticket.startTime);
+  const end = parseDate(ticket.endTime);
+  const now = referenceDate.getTime();
+  return start !== null && end !== null && start.getTime() <= now && now <= end.getTime();
+}
+
+export function isHighImpactChange(ticket: ChangeTicket): boolean {
+  const status = ticket.status.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (['closed', 'cancelled', 'canceled', 'rejected'].includes(status)) return false;
+  return ticket.classification === 'Emergency' || ticket.classification === 'Major';
+}
+
 // Format date into human-readable string
 export function formatDateTime(dateStr: string | null | undefined): string {
   const d = parseDate(dateStr);

@@ -66,6 +66,8 @@ export type DashboardView =
   | 'calendar'
   | 'upcoming'
   | 'overdue'
+  | 'inProgress'
+  | 'highImpact'
   | 'table';
 
 export interface FilterOptions {
