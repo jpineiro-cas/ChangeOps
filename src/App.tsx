@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChangeTicket, DashboardView } from './types/change';
 import { SAMPLE_CHANGE_TICKETS } from './data/sampleChanges';
 import { Header } from './components/Header';
+import { MetricCards } from './components/MetricCards';
 import { OverviewDashboard } from './components/OverviewDashboard';
 import { ChangeCalendar } from './components/ChangeCalendar';
 import { UpcomingChangesView } from './components/UpcomingChangesView';
@@ -194,6 +195,14 @@ export default function App() {
               <span>Export CSV</span>
             </button>
           </div>
+        </div>
+
+        <div className="mb-6">
+          <MetricCards
+            tickets={tickets}
+            referenceDate={referenceDate}
+            onSelectView={setCurrentView}
+          />
         </div>
 
         {/* View Routing */}

@@ -178,6 +178,7 @@ export function getRelativeTimeString(dateStr: string | null | undefined, refere
 type OverdueStatus =
   | 'terminal'
   | 'inProgress'
+  | 'approvalInProgress'
   | 'scheduled'
   | 'approved'
   | 'awaitingApproval'
@@ -202,6 +203,7 @@ function classifyOverdueStatus(status: string): OverdueStatus {
   ) {
     return 'inProgress';
   }
+  if (normalized.includes('inapprovalprocess')) return 'approvalInProgress';
   if (normalized.includes('scheduled')) return 'scheduled';
   if (normalized.includes('approved') && !normalized.includes('unapproved')) return 'approved';
   if (
@@ -224,6 +226,16 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
     return null;
   }
 
+  if (status === 'approvalInProgress') {
+    return {
+      ticket,
+      reason: 'approval_pending',
+      severity: 'info',
+      message: 'IT approval is in progress. Review the ticket for an approval decision.',
+      hoursDelta: 0,
+    };
+  }
+
   const start = parseDate(ticket.startTime);
   const end = parseDate(ticket.endTime);
   const now = referenceDate.getTime();
@@ -236,7 +248,7 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
         ticket,
         reason: 'past_end_time',
         severity: 'critical',
-        message: `Change window closed ${hoursOver}h ago but status is still "In Progress". Work has exceeded scheduled window.`,
+        message: `Change window closed ${hoursOver}h ago but status is still "${ticket.status}". Work has exceeded scheduled window.`,
         hoursDelta: hoursOver,
       };
     }

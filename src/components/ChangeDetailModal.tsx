@@ -112,9 +112,13 @@ export const ChangeDetailModal: React.FC<ChangeDetailModalProps> = ({
         {overdueAnalysis && (
           <div
             className={`p-3 rounded-lg border text-xs flex items-start gap-2.5 ${
-              overdueAnalysis.severity === 'critical'
+              overdueAnalysis.reason === 'approval_pending'
+                ? 'bg-cyan-50 border-cyan-200 text-cyan-900'
+                : overdueAnalysis.severity === 'critical'
                 ? 'bg-rose-50 border-rose-200 text-rose-900'
-                : 'bg-amber-50 border-amber-200 text-amber-900'
+                : overdueAnalysis.severity === 'warning'
+                ? 'bg-amber-50 border-amber-200 text-amber-900'
+                : 'bg-blue-50 border-blue-200 text-blue-900'
             }`}
           >
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />

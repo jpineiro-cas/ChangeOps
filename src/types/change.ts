@@ -43,6 +43,7 @@ export type OverdueReason =
   | 'past_end_time' // End time passed but not completed/closed
   | 'past_start_time' // Start time passed but still in requested/review/scheduled
   | 'unapproved_imminent' // Starts in <24h but not approved
+  | 'approval_pending' // Approval process is underway
   | 'pending_verification_stale'; // Implemented >48h ago without closure
 
 export interface OverdueAnalysis {

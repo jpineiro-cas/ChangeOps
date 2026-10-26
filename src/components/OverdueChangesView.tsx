@@ -55,6 +55,8 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
   const criticalCount = analyses.filter((a) => a.severity === 'critical').length;
   const warningCount = analyses.filter((a) => a.severity === 'warning').length;
   const infoCount = analyses.filter((a) => a.severity === 'info').length;
+  const approvalCount = analyses.filter((a) => a.reason === 'approval_pending').length;
+  const pendingReviewCount = infoCount - approvalCount;
 
   const getReasonLabel = (reason: OverdueReason) => {
     switch (reason) {
@@ -64,6 +66,8 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
         return 'Start Time Passed (Stalled)';
       case 'unapproved_imminent':
         return 'Imminent Start Unapproved';
+      case 'approval_pending':
+        return 'Awaiting Approval';
       case 'pending_verification_stale':
         return 'Stale PIR / Unclosed';
       default:
@@ -89,7 +93,7 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
           </div>
 
           {/* Quick Summary Pill count */}
-          <div className="flex items-center gap-2 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
             <span className="px-2.5 py-1 rounded bg-rose-100 text-rose-800 font-semibold">
               {criticalCount} Critical
             </span>
@@ -97,7 +101,10 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
               {warningCount} Warning
             </span>
             <span className="px-2.5 py-1 rounded bg-blue-100 text-blue-800 font-semibold">
-              {infoCount} Pending Review
+              {pendingReviewCount} Pending Review
+            </span>
+            <span className="px-2.5 py-1 rounded bg-cyan-100 text-cyan-800 font-semibold">
+              {approvalCount} Awaiting Approval
             </span>
           </div>
         </div>
@@ -117,7 +124,7 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
             <option value="all">All Severities ({analyses.length})</option>
             <option value="critical">Critical ({criticalCount})</option>
             <option value="warning">Warning ({warningCount})</option>
-            <option value="info">Info / PIR ({infoCount})</option>
+            <option value="info">Info / PIR / Approval ({infoCount})</option>
           </select>
 
           <select
@@ -129,6 +136,7 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
             <option value="past_end_time">Execution Window Expired</option>
             <option value="past_start_time">Start Time Passed</option>
             <option value="unapproved_imminent">Imminent Unapproved</option>
+            <option value="approval_pending">Awaiting Approval</option>
             <option value="pending_verification_stale">Stale Verification / PIR</option>
           </select>
         </div>
@@ -150,12 +158,15 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
           {filteredAnalyses.map(({ ticket, reason, severity, message }) => {
             const isCritical = severity === 'critical';
             const isWarning = severity === 'warning';
+            const isApprovalPending = reason === 'approval_pending';
 
             return (
               <div
                 key={ticket.id}
                 className={`bg-white border rounded-lg p-4 transition-all hover:shadow-xs space-y-3 ${
-                  isCritical
+                  isApprovalPending
+                    ? 'border-cyan-300 bg-cyan-50/20'
+                    : isCritical
                     ? 'border-rose-300 bg-rose-50/20'
                     : isWarning
                     ? 'border-amber-300 bg-amber-50/20'
@@ -170,7 +181,9 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
                     </span>
                     <span
                       className={`text-xs font-semibold px-2 py-0.5 rounded font-mono ${
-                        isCritical
+                        isApprovalPending
+                          ? 'bg-cyan-100 text-cyan-800'
+                          : isCritical
                           ? 'bg-rose-100 text-rose-800'
                           : isWarning
                           ? 'bg-amber-100 text-amber-800'
@@ -203,7 +216,9 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
                 {/* Specific Diagnosis Message */}
                 <div
                   className={`p-2.5 rounded text-xs flex items-start gap-2 ${
-                    isCritical
+                    isApprovalPending
+                      ? 'bg-cyan-100/70 text-cyan-950'
+                      : isCritical
                       ? 'bg-rose-100/70 text-rose-950 font-medium'
                       : isWarning
                       ? 'bg-amber-100/70 text-amber-950 font-medium'
@@ -213,7 +228,7 @@ export const OverdueChangesView: React.FC<OverdueChangesViewProps> = ({
                   {isCritical ? (
                     <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                   ) : (
-                    <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <Info className={`w-4 h-4 shrink-0 mt-0.5 ${isApprovalPending ? 'text-cyan-600' : isWarning ? 'text-amber-600' : 'text-blue-600'}`} />
                   )}
                   <span>{message}</span>
                 </div>

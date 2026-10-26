@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { ChangeTicket, DashboardView } from '../types/change';
-import { MetricCards } from './MetricCards';
 import { ConflictAlertBanner } from './ConflictAlertBanner';
 import { detectConflicts, analyzeOverdue, parseDate, getRelativeTimeString } from '../utils/dateUtils';
 import {
@@ -83,13 +82,6 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* KPI Stat Cards */}
-      <MetricCards
-        tickets={tickets}
-        referenceDate={referenceDate}
-        onSelectView={onSelectView}
-      />
-
       {/* Collision Alerts */}
       <ConflictAlertBanner
         conflicts={conflicts}
@@ -124,12 +116,14 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             </div>
           ) : (
             <div className="space-y-3">
-              {overdueItems.map(({ ticket, message, severity }) => (
+              {overdueItems.map(({ ticket, message, severity, reason }) => (
                 <div
                   key={ticket.id}
                   onClick={() => onSelectTicket(ticket)}
                   className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-xs space-y-1.5 ${
-                    severity === 'critical'
+                    reason === 'approval_pending'
+                      ? 'border-cyan-200 bg-cyan-50/40 hover:bg-cyan-50/70'
+                      : severity === 'critical'
                       ? 'border-rose-200 bg-rose-50/40 hover:bg-rose-50/70'
                       : 'border-amber-200 bg-amber-50/40 hover:bg-amber-50/70'
                   }`}
@@ -147,7 +141,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                     {ticket.title}
                   </h4>
 
-                  <p className="text-[11px] text-rose-800">
+                  <p className={`text-[11px] ${reason === 'approval_pending' ? 'text-cyan-800' : severity === 'critical' ? 'text-rose-800' : 'text-amber-800'}`}>
                     {message}
                   </p>
 
