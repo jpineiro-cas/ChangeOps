@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChangeTicket } from '../types/change';
 import {
   parseCSVFile,
@@ -23,12 +23,14 @@ interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImportTickets: (tickets: ChangeTicket[], mode: 'replace' | 'append') => void;
+  initialImportMode: 'replace' | 'append';
 }
 
 export const ImportModal: React.FC<ImportModalProps> = ({
   isOpen,
   onClose,
   onImportTickets,
+  initialImportMode,
 }) => {
   const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload');
   const [fileContent, setFileContent] = useState<string>('');
@@ -39,9 +41,13 @@ export const ImportModal: React.FC<ImportModalProps> = ({
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [previewTickets, setPreviewTickets] = useState<ChangeTicket[]>([]);
   const [parseErrors, setParseErrors] = useState<string[]>([]);
-  const [importMode, setImportMode] = useState<'replace' | 'append'>('replace');
+  const [importMode, setImportMode] = useState<'replace' | 'append'>(initialImportMode);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) setImportMode(initialImportMode);
+  }, [isOpen, initialImportMode]);
 
   if (!isOpen) return null;
 

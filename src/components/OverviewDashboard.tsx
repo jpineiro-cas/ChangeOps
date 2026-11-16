@@ -1,7 +1,13 @@
 import React, { useMemo } from 'react';
 import { ChangeTicket, DashboardView } from '../types/change';
 import { ConflictAlertBanner } from './ConflictAlertBanner';
-import { detectConflicts, analyzeOverdue, parseDate, getRelativeTimeString } from '../utils/dateUtils';
+import {
+  detectConflicts,
+  analyzeOverdue,
+  isTerminalChangeStatus,
+  parseDate,
+  getRelativeTimeString,
+} from '../utils/dateUtils';
 import {
   AlertTriangle,
   Clock,
@@ -41,7 +47,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   const nextUpcoming = useMemo(() => {
     return tickets
       .filter((t) => {
-        if (t.status === 'Closed' || t.status === 'Cancelled' || t.status === 'Rejected') return false;
+        if (isTerminalChangeStatus(t.status)) return false;
         const start = parseDate(t.startTime);
         if (!start) return false;
         return start.getTime() >= now && start.getTime() <= next48h;
@@ -58,7 +64,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   const classificationCounts = useMemo(() => {
     const counts = { Standard: 0, Normal: 0, Major: 0, Emergency: 0 };
     tickets.forEach((t) => {
-      if (t.status !== 'Closed' && t.status !== 'Cancelled') {
+      if (!isTerminalChangeStatus(t.status)) {
         if (counts[t.classification] !== undefined) {
           counts[t.classification]++;
         }
@@ -71,7 +77,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   const adminGroupCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     tickets.forEach((t) => {
-      if (t.status !== 'Closed' && t.status !== 'Cancelled') {
+      if (!isTerminalChangeStatus(t.status)) {
         counts[t.adminGroup] = (counts[t.adminGroup] || 0) + 1;
       }
     });

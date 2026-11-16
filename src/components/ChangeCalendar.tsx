@@ -1,6 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { ChangeTicket } from '../types/change';
-import { parseDate, formatTimeOnly, formatShortDate } from '../utils/dateUtils';
+import {
+  parseDate,
+  formatTimeOnly,
+  formatShortDate,
+  isTerminalChangeStatus,
+} from '../utils/dateUtils';
 import {
   ChevronLeft,
   ChevronRight,
@@ -498,7 +503,7 @@ export const ChangeCalendar: React.FC<ChangeCalendarProps> = ({
               const groupTickets = filteredTickets.filter(
                 (t) =>
                   t.adminGroup === group &&
-                  t.status !== 'Closed' &&
+                  !isTerminalChangeStatus(t.status) &&
                   t.status !== 'Cancelled'
               );
               if (groupTickets.length === 0) return null;

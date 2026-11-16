@@ -66,9 +66,34 @@ export function parseDate(dateStr: string | null | undefined): Date | null {
   return null;
 }
 
+function normalizeStatus(status: string): string {
+  return status.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+export function isCompletedChangeStatus(status: string): boolean {
+  return normalizeStatus(status) === 'changecompleted';
+}
+
+export function isRejectedChangeStatus(status: string): boolean {
+  const normalized = normalizeStatus(status);
+  return normalized === 'changerejected' || normalized === 'rejected';
+}
+
+export function isHistoricalChangeStatus(status: string): boolean {
+  return isCompletedChangeStatus(status) || isRejectedChangeStatus(status);
+}
+
+export function isTerminalChangeStatus(status: string): boolean {
+  const normalized = normalizeStatus(status);
+  return (
+    isHistoricalChangeStatus(status) ||
+    ['closed', 'cancelled', 'canceled', 'rejected'].includes(normalized)
+  );
+}
+
 export function isChangeInProgress(ticket: ChangeTicket, referenceDate: Date): boolean {
-  const status = ticket.status.toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (['closed', 'cancelled', 'canceled', 'rejected'].includes(status)) return false;
+  const status = normalizeStatus(ticket.status);
+  if (isTerminalChangeStatus(ticket.status)) return false;
 
   if (
     status.includes('inimplementation') ||
@@ -85,8 +110,7 @@ export function isChangeInProgress(ticket: ChangeTicket, referenceDate: Date): b
 }
 
 export function isHighImpactChange(ticket: ChangeTicket): boolean {
-  const status = ticket.status.toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (['closed', 'cancelled', 'canceled', 'rejected'].includes(status)) return false;
+  if (isTerminalChangeStatus(ticket.status)) return false;
   return ticket.classification === 'Emergency' || ticket.classification === 'Major';
 }
 
@@ -187,9 +211,9 @@ type OverdueStatus =
   | 'other';
 
 function classifyOverdueStatus(status: string): OverdueStatus {
-  const normalized = status.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normalized = normalizeStatus(status);
 
-  if (['closed', 'cancelled', 'canceled', 'rejected'].some((value) => normalized.includes(value))) {
+  if (isTerminalChangeStatus(status)) {
     return 'terminal';
   }
   if (normalized.includes('verification')) return 'pendingVerification';
@@ -277,7 +301,7 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
         ticket,
         reason: 'past_start_time',
         severity: 'warning',
-        message: `Execution start was scheduled ${hoursLate}h ago, but status was not progressed to "In Progress".`,
+        message: `Execution start was scheduled ${hoursLate}h ago, but status was not progressed to "In Implementation".`,
         hoursDelta: hoursLate,
       };
     }
@@ -327,7 +351,7 @@ export function analyzeOverdue(ticket: ChangeTicket, referenceDate: Date = new D
 // Detect schedule overlaps / conflicts between tickets
 export function detectConflicts(tickets: ChangeTicket[]): ConflictNotice[] {
   const activeTickets = tickets.filter(
-    (t) => t.status !== 'Closed' && t.status !== 'Cancelled' && t.status !== 'Rejected'
+    (t) => !isTerminalChangeStatus(t.status)
   );
   const conflicts: ConflictNotice[] = [];
 

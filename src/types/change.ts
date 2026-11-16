@@ -69,7 +69,8 @@ export type DashboardView =
   | 'overdue'
   | 'inProgress'
   | 'highImpact'
-  | 'table';
+  | 'table'
+  | 'history';
 
 export interface FilterOptions {
   search: string;

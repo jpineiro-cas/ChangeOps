@@ -1,6 +1,12 @@
 import React from 'react';
 import { ChangeTicket, DashboardView } from '../types/change';
-import { analyzeOverdue, isChangeInProgress, isHighImpactChange, parseDate } from '../utils/dateUtils';
+import {
+  analyzeOverdue,
+  isChangeInProgress,
+  isHighImpactChange,
+  isTerminalChangeStatus,
+  parseDate,
+} from '../utils/dateUtils';
 import {
   AlertCircle,
   Calendar,
@@ -32,7 +38,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
   const inProgressList = tickets.filter((t) => isChangeInProgress(t, referenceDate));
 
   const upcoming7Days = tickets.filter((t) => {
-    if (t.status === 'Closed' || t.status === 'Cancelled' || t.status === 'Rejected') return false;
+    if (isTerminalChangeStatus(t.status)) return false;
     const start = parseDate(t.startTime);
     if (!start) return false;
     const time = start.getTime();
@@ -40,7 +46,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
   });
 
   const downtimeChanges = tickets.filter((t) => {
-    if (t.status === 'Closed' || t.status === 'Cancelled' || t.status === 'Rejected') return false;
+    if (isTerminalChangeStatus(t.status)) return false;
     return t.expectedDowntime.toLowerCase().includes('y');
   });
 

@@ -4,6 +4,7 @@ import {
   parseDate,
   formatDateTime,
   getRelativeTimeString,
+  isTerminalChangeStatus,
 } from '../utils/dateUtils';
 import {
   Calendar,
@@ -35,13 +36,7 @@ export const UpcomingChangesView: React.FC<UpcomingChangesViewProps> = ({
   const upcomingTickets = useMemo(() => {
     return tickets
       .filter((t) => {
-        if (
-          t.status === 'Closed' ||
-          t.status === 'Cancelled' ||
-          t.status === 'Rejected'
-        ) {
-          return false;
-        }
+        if (isTerminalChangeStatus(t.status)) return false;
 
         const start = parseDate(t.startTime);
         if (!start) return false;

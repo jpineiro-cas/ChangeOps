@@ -145,7 +145,7 @@ export const ChangeDetailModal: React.FC<ChangeDetailModalProps> = ({
 
         <div className="space-y-6">
           {/* The 17 Core Export Fields Structured */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4">
             {/* Box 1: Execution & Roles */}
             <div className="bg-slate-50/70 border border-slate-200 rounded-lg p-4 space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono flex items-center gap-1.5">

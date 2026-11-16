@@ -36,3 +36,11 @@ that browser. To publish a dataset for everyone:
 
 Only publish ticket data that is approved to be visible to everyone who can
 access the repository and deployed site.
+
+Completed and rejected tickets can be added from **History** using
+**Import historical tickets**.
+Choose **Append to current** to add historical tickets without replacing the
+current dataset. The History view keeps completed and rejected tickets
+searchable and shows counts for total historical tickets, major/emergency
+tickets, and tickets with
+expected downtime.

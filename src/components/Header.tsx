@@ -4,6 +4,7 @@ import {
   Upload,
   AlertTriangle,
   Lock,
+  Archive,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -106,6 +107,17 @@ export const Header: React.FC<HeaderProps> = ({
             >
               All Changes
             </button>
+            <button
+              onClick={() => onViewChange('history')}
+              className={`inline-flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium transition-colors ${
+                currentView === 'history'
+                  ? 'text-slate-950 border-b-2 border-slate-900 font-semibold'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Archive className="w-3.5 h-3.5" />
+              <span>History</span>
+            </button>
           </nav>
 
           {/* Sync / Import Button */}
@@ -123,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Mobile View Switcher */}
         <div className="flex md:hidden overflow-x-auto py-2 border-t border-slate-100 gap-2">
-          {(['overview', 'calendar', 'upcoming', 'overdue', 'table'] as DashboardView[]).map((view) => (
+          {(['overview', 'calendar', 'upcoming', 'overdue', 'table', 'history'] as DashboardView[]).map((view) => (
             <button
               key={view}
               onClick={() => onViewChange(view)}
@@ -138,6 +150,7 @@ export const Header: React.FC<HeaderProps> = ({
               {view === 'upcoming' && `Upcoming (${upcomingCount})`}
               {view === 'overdue' && `Overdue (${overdueCount})`}
               {view === 'table' && 'All Changes'}
+              {view === 'history' && 'History'}
             </button>
           ))}
         </div>

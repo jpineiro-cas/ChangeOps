@@ -8,10 +8,18 @@ import { ChangeCalendar } from './components/ChangeCalendar';
 import { UpcomingChangesView } from './components/UpcomingChangesView';
 import { OverdueChangesView } from './components/OverdueChangesView';
 import { ChangeTableView } from './components/ChangeTableView';
+import { ClosedChangesView } from './components/ClosedChangesView';
 import { ChangeDetailModal } from './components/ChangeDetailModal';
 import { ImportModal } from './components/ImportModal';
 import { SourceOfTruthBanner } from './components/SourceOfTruthBanner';
-import { analyzeOverdue, isChangeInProgress, isHighImpactChange, parseDate } from './utils/dateUtils';
+import {
+  analyzeOverdue,
+  isChangeInProgress,
+  isHighImpactChange,
+  isHistoricalChangeStatus,
+  isTerminalChangeStatus,
+  parseDate,
+} from './utils/dateUtils';
 import { exportTicketsToCSV, downloadFile } from './utils/csvHelper';
 import { RotateCcw, Download } from 'lucide-react';
 
@@ -61,6 +69,7 @@ export default function App() {
   // Modals state
   const [selectedTicket, setSelectedTicket] = useState<ChangeTicket | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [initialImportMode, setInitialImportMode] = useState<'replace' | 'append'>('replace');
 
   // Overdue count
   const overdueCount = tickets
@@ -70,11 +79,17 @@ export default function App() {
   // Upcoming count (non-terminal changes starting at or after the current time)
   const now = referenceDate.getTime();
   const upcomingCount = tickets.filter((t) => {
-    if (t.status === 'Closed' || t.status === 'Cancelled' || t.status === 'Rejected') return false;
+    if (isTerminalChangeStatus(t.status)) return false;
     const start = parseDate(t.startTime);
     if (!start) return false;
     return start.getTime() >= now;
   }).length;
+  const historicalTickets = tickets.filter((ticket) => isHistoricalChangeStatus(ticket.status));
+
+  const openImportModal = (mode: 'replace' | 'append' = 'replace') => {
+    setInitialImportMode(mode);
+    setIsImportModalOpen(true);
+  };
 
   const handleImportTickets = (
     imported: ChangeTicket[],
@@ -130,7 +145,7 @@ export default function App() {
         onViewChange={setCurrentView}
         overdueCount={overdueCount}
         upcomingCount={upcomingCount}
-        onOpenImport={() => setIsImportModalOpen(true)}
+        onOpenImport={() => openImportModal()}
         onResetSampleData={handleResetSampleData}
         onExportData={handleExportAll}
       />
@@ -140,7 +155,7 @@ export default function App() {
         {/* Source of Truth Banner */}
         <SourceOfTruthBanner
           lastImportTime={lastSyncTime}
-          onOpenImport={() => setIsImportModalOpen(true)}
+          onOpenImport={() => openImportModal()}
           ticketCount={tickets.length}
         />
 
@@ -197,13 +212,15 @@ export default function App() {
           </div>
         </div>
 
-        <div className="mb-6">
-          <MetricCards
-            tickets={tickets}
-            referenceDate={referenceDate}
-            onSelectView={setCurrentView}
-          />
-        </div>
+        {currentView !== 'history' && (
+          <div className="mb-6">
+            <MetricCards
+              tickets={tickets}
+              referenceDate={referenceDate}
+              onSelectView={setCurrentView}
+            />
+          </div>
+        )}
 
         {/* View Routing */}
         {currentView === 'overview' && (
@@ -259,6 +276,14 @@ export default function App() {
             onSelectTicket={setSelectedTicket}
           />
         )}
+
+        {currentView === 'history' && (
+          <ClosedChangesView
+            tickets={historicalTickets}
+            onSelectTicket={setSelectedTicket}
+            onImportClosedTickets={() => openImportModal('append')}
+          />
+        )}
       </main>
 
       {/* Footer */}
@@ -287,6 +312,7 @@ export default function App() {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImportTickets={handleImportTickets}
+        initialImportMode={initialImportMode}
       />
     </div>
   );
