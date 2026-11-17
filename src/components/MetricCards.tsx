@@ -4,6 +4,7 @@ import {
   analyzeOverdue,
   isChangeInProgress,
   isHighImpactChange,
+  isAuthorizedForUpcomingSchedule,
   isTerminalChangeStatus,
   parseDate,
 } from '../utils/dateUtils';
@@ -28,7 +29,6 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
   onSelectView,
 }) => {
   const now = referenceDate.getTime();
-  const sevenDaysFromNow = now + 7 * 24 * 60 * 60 * 1000;
 
   // Compute metrics
   const overdueList = tickets
@@ -37,12 +37,12 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
 
   const inProgressList = tickets.filter((t) => isChangeInProgress(t, referenceDate));
 
-  const upcoming7Days = tickets.filter((t) => {
-    if (isTerminalChangeStatus(t.status)) return false;
+  const upcomingChanges = tickets.filter((t) => {
+    if (!isAuthorizedForUpcomingSchedule(t.status)) return false;
     const start = parseDate(t.startTime);
     if (!start) return false;
     const time = start.getTime();
-    return time >= now && time <= sevenDaysFromNow;
+    return time >= now;
   });
 
   const downtimeChanges = tickets.filter((t) => {
@@ -100,18 +100,18 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
         </p>
       </button>
 
-      {/* 3. Upcoming (Next 7 Days) */}
+      {/* 3. Upcoming */}
       <button
         onClick={() => onSelectView('upcoming')}
         className="text-left p-4 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50 transition-all"
       >
         <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-          <span className="font-medium text-slate-700">Coming Up (7d)</span>
+          <span className="font-medium text-slate-700">Coming Up</span>
           <Calendar className="w-4 h-4 text-blue-600" />
         </div>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-semibold font-mono tabular-nums text-slate-900">
-            {upcoming7Days.length}
+            {upcomingChanges.length}
           </span>
           <span className="text-xs text-slate-500">scheduled</span>
         </div>

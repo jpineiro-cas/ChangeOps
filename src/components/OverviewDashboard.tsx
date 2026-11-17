@@ -4,6 +4,7 @@ import { ConflictAlertBanner } from './ConflictAlertBanner';
 import {
   detectConflicts,
   analyzeOverdue,
+  isAuthorizedForUpcomingSchedule,
   isTerminalChangeStatus,
   parseDate,
   getRelativeTimeString,
@@ -47,7 +48,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   const nextUpcoming = useMemo(() => {
     return tickets
       .filter((t) => {
-        if (isTerminalChangeStatus(t.status)) return false;
+        if (!isAuthorizedForUpcomingSchedule(t.status)) return false;
         const start = parseDate(t.startTime);
         if (!start) return false;
         return start.getTime() >= now && start.getTime() <= next48h;
@@ -182,7 +183,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
           {nextUpcoming.length === 0 ? (
             <div className="py-8 text-center text-xs text-slate-400">
               <Calendar className="w-8 h-8 text-slate-300 mx-auto mb-1.5" />
-              <p className="font-medium text-slate-700">No changes in next 48 hours</p>
+              <p className="font-medium text-slate-700">No new changes in next 48 hours</p>
               <p>Check the full Change Calendar for upcoming maintenance.</p>
             </div>
           ) : (

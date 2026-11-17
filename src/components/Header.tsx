@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14">
           {/* Wordmark & Read-only badge */}
           <div className="flex items-center gap-3">
             <span className="text-xl font-bold tracking-tight text-slate-900">
@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
           <nav className="hidden md:flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => onViewChange('overview')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`px-3 py-1 text-sm font-medium transition-colors ${
                 currentView === 'overview'
                   ? 'text-slate-950 border-b-2 border-slate-900 font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => onViewChange('calendar')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`px-3 py-1 text-sm font-medium transition-colors ${
                 currentView === 'calendar'
                   ? 'text-slate-950 border-b-2 border-slate-900 font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -68,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => onViewChange('upcoming')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 currentView === 'upcoming'
                   ? 'text-slate-950 border-b-2 border-slate-900 font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -83,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => onViewChange('overdue')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 currentView === 'overdue'
                   ? 'text-rose-700 border-b-2 border-rose-700 font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -99,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => onViewChange('table')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`px-3 py-1 text-sm font-medium transition-colors ${
                 currentView === 'table'
                   ? 'text-slate-950 border-b-2 border-slate-900 font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -109,7 +109,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => onViewChange('history')}
-              className={`inline-flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium transition-colors ${
                 currentView === 'history'
                   ? 'text-slate-950 border-b-2 border-slate-900 font-semibold'
                   : 'text-slate-500 hover:text-slate-800'
@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenImport}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 rounded-md hover:bg-slate-800 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-white bg-slate-900 rounded-md hover:bg-slate-800 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
               title="Import fresh tickets export from your ticketing system"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Mobile View Switcher */}
-        <div className="flex md:hidden overflow-x-auto py-2 border-t border-slate-100 gap-2">
+        <div className="flex md:hidden overflow-x-auto py-1.5 border-t border-slate-100 gap-2">
           {(['overview', 'calendar', 'upcoming', 'overdue', 'table', 'history'] as DashboardView[]).map((view) => (
             <button
               key={view}

@@ -103,6 +103,8 @@ export function isChangeInProgress(ticket: ChangeTicket, referenceDate: Date): b
     return true;
   }
 
+  if (!isAuthorizedForUpcomingSchedule(ticket.status)) return false;
+
   const start = parseDate(ticket.startTime);
   const end = parseDate(ticket.endTime);
   const now = referenceDate.getTime();
@@ -231,6 +233,7 @@ function classifyOverdueStatus(status: string): OverdueStatus {
   if (normalized.includes('scheduled')) return 'scheduled';
   if (normalized.includes('approved') && !normalized.includes('unapproved')) return 'approved';
   if (
+    normalized.includes('changeopenedandbeinganalyzed') ||
     normalized.includes('requested') ||
     normalized.includes('review') ||
     normalized.includes('unapproved') ||
@@ -240,6 +243,11 @@ function classifyOverdueStatus(status: string): OverdueStatus {
     return 'awaitingApproval';
   }
   return 'other';
+}
+
+export function isAuthorizedForUpcomingSchedule(status: string): boolean {
+  const classifiedStatus = classifyOverdueStatus(status);
+  return classifiedStatus === 'scheduled' || classifiedStatus === 'approved';
 }
 
 // Determine if a ticket is overdue or needs urgent updates

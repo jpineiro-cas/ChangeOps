@@ -17,6 +17,7 @@ import {
   isChangeInProgress,
   isHighImpactChange,
   isHistoricalChangeStatus,
+  isAuthorizedForUpcomingSchedule,
   isTerminalChangeStatus,
   parseDate,
 } from './utils/dateUtils';
@@ -76,10 +77,10 @@ export default function App() {
     .map((t) => analyzeOverdue(t, referenceDate))
     .filter((a): a is NonNullable<typeof a> => a !== null).length;
 
-  // Upcoming count (non-terminal changes starting at or after the current time)
+  // Upcoming count matches the authorized changes shown in the Coming Up card.
   const now = referenceDate.getTime();
   const upcomingCount = tickets.filter((t) => {
-    if (isTerminalChangeStatus(t.status)) return false;
+    if (!isAuthorizedForUpcomingSchedule(t.status)) return false;
     const start = parseDate(t.startTime);
     if (!start) return false;
     return start.getTime() >= now;
